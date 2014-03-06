@@ -185,7 +185,7 @@ public class RedBlackTree<E> implements Set<E> {
             return this.parent;
         }
 
-        public Node<E> setParent(Node<E> parent) {
+        public void setParent(Node<E> parent) {
             this.parent = parent;
         }
 		
