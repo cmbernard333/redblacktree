@@ -67,8 +67,18 @@ public class RedBlackTree<E> implements Set<E> {
         int compare = this.comparator.compare(element,node.getValue());
         if(compare<0) {
             /* element is less than node value */
+            if(node.getLeft()!=null) {
+                searchInTreeWithComparator(node.getLeft(),element);
+            } else {
+                node.setLeft(new Node<E>(element,node,null,null));
+            }
         } else if (compare>0) {
             /* element is greater than node value*/
+            if(node.getRight()!=null) {
+                searchInTreeWithComparator(node.getRight(),element);
+            } else {
+                node.setLeft(new Node<E>(element,node,null,null));
+            }
         }
     }
 
