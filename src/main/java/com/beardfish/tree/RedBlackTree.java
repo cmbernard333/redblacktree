@@ -1,5 +1,14 @@
 package com.beardfish.tree;
 
+/**
+ * Red Black Tree Properties :
+ *
+ * 1. A node is either red or black.
+ * 2. All leaves (NIL) are black. (All leaves are same color as the root.)
+ * 3. Every red node must have two black child nodes.
+ * 4. Every path from a given node to any of its descendant leaves contains the same number of black nodes.
+ */
+
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -48,14 +57,32 @@ public class RedBlackTree<E> implements Set<E> {
             if(node.getLeft()!=null) {
                 searchInTreeWithComparable(node.getLeft(),element);
             } else {
-                node.setLeft(new Node<E>(element,node,null,null));
+                /* if the parent is black its okay to add a red child */
+                if(node.getColor().equals(Node.Color.Black)) {
+                    node.setLeft(new Node<E>(element,node,null,null));
+                } else if(node.getColor().equals(Node.Color.Red)) {
+                    /* check the uncle to see if he is red as well */
+                    Node<E> uncle = (Node<E>) getUncle(node);
+                    if(uncle.getColor().equals(Node.Color.Red)) {
+
+                    }
+                }
             }
         } else if(compare>0) {
             /* element is greater than node value */
             if(node.getRight()!=null) {
                 searchInTreeWithComparable(node.getRight(),element);
             } else {
-                node.setRight(new Node<E>(element,node,null,null));
+                /* if the parent is black its okay to add a red child */
+                if(node.getColor().equals(Node.Color.Black)) {
+                    node.setRight(new Node<E>(element,node,null,null));
+                } else if(node.getColor().equals(Node.Color.Red)) {
+                    /* check the uncle to see if he is red as well */
+                    Node<E> uncle = (Node<E>) getUncle(node);
+                    if(uncle.getColor().equals(Node.Color.Red)) {
+
+                    }
+                }
             }
         }
     }
@@ -70,14 +97,32 @@ public class RedBlackTree<E> implements Set<E> {
             if(node.getLeft()!=null) {
                 searchInTreeWithComparator(node.getLeft(),element);
             } else {
-                node.setLeft(new Node<E>(element,node,null,null));
+                /* if the parent is black its okay to add a red child */
+                if(node.getColor().equals(Node.Color.Black)) {
+                    node.setLeft(new Node<E>(element,node,null,null));
+                } else if(node.getColor().equals(Node.Color.Red)) {
+                    /* check the uncle to see if he is red as well */
+                    Node<E> uncle = (Node<E>) getUncle(node);
+                    if(uncle.getColor().equals(Node.Color.Red)) {
+
+                    }
+                }
             }
         } else if (compare>0) {
             /* element is greater than node value*/
             if(node.getRight()!=null) {
                 searchInTreeWithComparator(node.getRight(),element);
             } else {
-                node.setLeft(new Node<E>(element,node,null,null));
+                /* if the parent is black then its okay to add a red child */
+                if(node.getColor().equals(Node.Color.Black)) {
+                    node.setLeft(new Node<E>(element,node,null,null));
+                } else if(node.getColor().equals(Node.Color.Red)) {
+                    /* check the uncle to see if he is red as well */
+                    Node<E> uncle = (Node<E>) getUncle(node);
+                    if(uncle.getColor().equals(Node.Color.Red)) {
+
+                    }
+                }
             }
         }
     }
