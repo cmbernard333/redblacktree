@@ -98,11 +98,12 @@ public class RedBlackTree<E> implements Set<E> {
 
     /**
      * Rebalance the tree until all properties are fullfilled
+     *
      * @param node -- the node to start the rebalance from
      */
     public void rebalanceTree(Node<E> node) {
         /* root */
-        if(node.getParent()==null) {
+        if (node.getParent() == null) {
             node.setColor(Node.Color.Black);
         }
         /* if the parent is black its okay to add a red child */
@@ -111,16 +112,24 @@ public class RedBlackTree<E> implements Set<E> {
         } else if (node.getParent().getColor().equals(Node.Color.Red)) {
             /* check the uncle to see if he is red as well */
             Node<E> uncle = (Node<E>) getUncle(node);
-            if ((uncle != null) && uncle.getColor().equals(Node.Color.Red)) {
-                node.getParent().setColor(Node.Color.Black);
-                uncle.setColor(Node.Color.Black);
+            if (uncle != null) {
                 Node<E> grandParent = (Node<E>) getGrandParent(node);
-                grandParent.setColor(Node.Color.Red);
-                rebalanceTree(grandParent);
+                if (uncle.getColor().equals(Node.Color.Red)) {
+                    node.getParent().setColor(Node.Color.Black);
+                    uncle.setColor(Node.Color.Black);
+                    grandParent.setColor(Node.Color.Red);
+                    rebalanceTree(grandParent);
+                }
+                else if (uncle.getColor().equals(Node.Color.Black)) {
+                    if(node.getParent().getRight()==node && grandParent.getLeft()==node.getParent()) {
+                        rotateLeft(node.getParent());
+                    } else if(node.getParent().getLeft()==node && grandParent.getRight()==node.getParent()) {
+                        rotateRight(node.getParent());
+                    }
+                }
             }
         }
     }
-
 
     @Override
     public void clear() {
@@ -186,6 +195,9 @@ public class RedBlackTree<E> implements Set<E> {
         return null;
     }
 
+
+    /* utility methods */
+
     private static Node<?> getGrandParent(Node<?> node) {
         if (node != null && node.getParent() != null) {
             node.getParent().getParent();
@@ -203,6 +215,27 @@ public class RedBlackTree<E> implements Set<E> {
         }
         return grandParent.getLeft();
     }
+
+    private void rotateLeft(Node<E> node) {
+        Node<E> grandParent = node.getParent();
+        Node<E> rightChild = node.getRight();
+        Node<E> rightChildLeft = rightChild.getLeft();
+        grandParent.setLeft(rightChild);
+        rightChild.setLeft(node);
+        node.setRight(rightChildLeft);
+
+    }
+
+    private void rotateRight(Node<E> node) {
+        Node<E> grandParent = node.getParent();
+        Node<E> leftChild = node.getLeft();
+        Node<E> leftChildRight = leftChild.getRight();
+        grandParent.setRight(leftChild);
+        leftChild.setRight(node);
+        node.setLeft(leftChildRight);
+    }
+
+    /* node inner class */
 
     private static class Node<E> {
 
