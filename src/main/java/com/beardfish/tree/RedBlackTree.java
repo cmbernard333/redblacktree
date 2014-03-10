@@ -27,17 +27,19 @@ public class RedBlackTree<E> implements Set<E> {
 
     @Override
     public boolean add(E ele) {
+        boolean inserted = false;
         if (this.root == null) {
             this.root = new Node<E>(ele, null, null, null);
             this.root.setColor(Node.Color.Black);
+            inserted = true;
         } else {
             if (this.comparator != null) {
-                this.binarySearchWithComparator(this.root, ele);
+                inserted = this.binarySearchWithComparator(this.root, ele);
             } else {
-                this.binarySearchWithComparable(this.root, ele);
+                inserted = this.binarySearchWithComparable(this.root, ele);
             }
         }
-        return false;
+        return inserted;
     }
 
     @Override
@@ -51,7 +53,7 @@ public class RedBlackTree<E> implements Set<E> {
      * @param node    -- the starting node
      * @param element -- the element to be added
      */
-    public void binarySearchWithComparator(Node<E> node, E element) {
+    public boolean binarySearchWithComparator(Node<E> node, E element) {
         int compare = this.comparator.compare(element, node.getValue());
         if (compare < 0) {
             /* element is less than node value */
@@ -67,6 +69,8 @@ public class RedBlackTree<E> implements Set<E> {
             } else {
                 node.setRight(new Node<E>(element, node, null, null));
             }
+        } else if (compare==0) {
+            return false;
         }
     }
 
@@ -76,7 +80,7 @@ public class RedBlackTree<E> implements Set<E> {
      * @param node    -- the starting node
      * @param element -- the element to be added
      */
-    public void binarySearchWithComparable(Node<E> node, E element) {
+    public boolean binarySearchWithComparable(Node<E> node, E element) {
         Comparable<? super E> key = (Comparable<? super E>) element;
         int compare = key.compareTo(node.getValue());
         if (compare < 0) {
@@ -93,6 +97,8 @@ public class RedBlackTree<E> implements Set<E> {
             } else {
                 node.setRight(new Node<E>(element, node, null, null));
             }
+        } else if(compare==0) {
+            return false;
         }
     }
 
@@ -149,7 +155,6 @@ public class RedBlackTree<E> implements Set<E> {
 
     @Override
     public boolean isEmpty() {
-
         return size == 0;
     }
 
@@ -179,7 +184,6 @@ public class RedBlackTree<E> implements Set<E> {
 
     @Override
     public int size() {
-
         return this.size;
     }
 
