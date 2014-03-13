@@ -24,6 +24,10 @@ public class RedBlackTree<E> implements Set<E> {
         this.comparator = comparator;
     }
 
+    public RedBlackTree() {
+        this.comparator = null;
+    }
+
 
     @Override
     public boolean add(E ele) {
@@ -39,6 +43,11 @@ public class RedBlackTree<E> implements Set<E> {
                 inserted = this.binarySearchWithComparable(this.root, ele);
             }
         }
+
+        if(inserted) {
+           ++size;
+        }
+
         return inserted;
     }
 
@@ -58,20 +67,21 @@ public class RedBlackTree<E> implements Set<E> {
         if (compare < 0) {
             /* element is less than node value */
             if (node.getLeft() != null) {
-                binarySearchWithComparator(node.getLeft(), element);
+                return binarySearchWithComparator(node.getLeft(), element);
             } else {
                 node.setLeft(new Node<E>(element, node, null, null));
+                return true;
             }
         } else if (compare > 0) {
             /* element is greater than node value */
             if (node.getRight() != null) {
-                binarySearchWithComparator(node.getRight(), element);
+                return binarySearchWithComparator(node.getRight(), element);
             } else {
                 node.setRight(new Node<E>(element, node, null, null));
+                return true;
             }
-        } else if (compare==0) {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -86,20 +96,21 @@ public class RedBlackTree<E> implements Set<E> {
         if (compare < 0) {
             /* element is less than node value */
             if (node.getLeft() != null) {
-                binarySearchWithComparable(node.getLeft(), element);
+                return binarySearchWithComparable(node.getLeft(), element);
             } else {
                 node.setLeft(new Node<E>(element, node, null, null));
+                return true;
             }
         } else if (compare > 0) {
             /* element is greater than node value */
             if (node.getRight() != null) {
-                binarySearchWithComparable(node.getRight(), element);
+                return binarySearchWithComparable(node.getRight(), element);
             } else {
                 node.setRight(new Node<E>(element, node, null, null));
+                return true;
             }
-        } else if(compare==0) {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -119,18 +130,31 @@ public class RedBlackTree<E> implements Set<E> {
             /* check the uncle to see if he is red as well */
             Node<E> uncle = (Node<E>) getUncle(node);
             if (uncle != null) {
-                Node<E> grandParent = (Node<E>) getGrandParent(node);
                 if (uncle.getColor().equals(Node.Color.Red)) {
+                    Node<E> grandParent = (Node<E>) getGrandParent(node);
                     node.getParent().setColor(Node.Color.Black);
                     uncle.setColor(Node.Color.Black);
                     grandParent.setColor(Node.Color.Red);
                     rebalanceTree(grandParent);
                 }
                 else if (uncle.getColor().equals(Node.Color.Black)) {
+                    Node<E> grandParent = (Node<E>) getGrandParent(node);
                     if(node.getParent().getRight()==node && grandParent.getLeft()==node.getParent()) {
                         rotateLeft(node.getParent());
+                        node = node.getLeft();
                     } else if(node.getParent().getLeft()==node && grandParent.getRight()==node.getParent()) {
                         rotateRight(node.getParent());
+                        node = node.getRight();
+                    }
+
+                    /* need to grab the grand parent again in case of right and left rotation */
+                    grandParent = (Node<E>) getGrandParent(node);
+                    node.getParent().setColor(Node.Color.Black);
+                    grandParent.setColor(Node.Color.Red);
+                    if(node==node.getParent().getLeft()) {
+                        rotateRight(grandParent);
+                    } else {
+                        rotateLeft(grandParent);
                     }
                 }
             }
@@ -139,18 +163,30 @@ public class RedBlackTree<E> implements Set<E> {
 
     @Override
     public void clear() {
-
+        this.root = null;
     }
 
     @Override
     public boolean contains(Object o) {
-        return false;
+        if(o==null || !o.getClass().equals(this.root.value.getClass())) {
+            return false;
+        }
+        /* do some binary searching */
+        E oe = (E) o;
+        if(this.comparator==null) {
+            return this.binarySearchWithComparable(this.root,oe);
+        }
+        return this.binarySearchWithComparator(this.root,oe);
     }
 
     @Override
     public boolean containsAll(Collection<?> col) {
-
-        return false;
+        boolean found = true;
+        Iterator<?> it = col.iterator();
+        while(it.hasNext()) {
+            found = found && this.contains(it.next());
+        }
+        return found;
     }
 
     @Override
@@ -300,6 +336,12 @@ public class RedBlackTree<E> implements Set<E> {
         public void setColor(Color color) {
             this.color = color;
         }
+
+		@Override
+		public String toString() {
+			return "Node [value=" + this.value + ", parent=" + ((this.parent!=null) ? this.parent.value : null) + ", left="
+					+ ((this.left!=null) ? this.left.value : null) + ", right=" + ((this.right!=null) ? this.right.value : null) + ", color=" + color + "]";
+		}
     }
 
 }
