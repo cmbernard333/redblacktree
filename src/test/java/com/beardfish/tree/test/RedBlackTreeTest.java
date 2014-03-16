@@ -1,6 +1,7 @@
 package com.beardfish.tree.test;
 
 import com.beardfish.tree.RedBlackTree;
+
 import org.junit.Test;
 
 /**
@@ -8,13 +9,23 @@ import org.junit.Test;
  */
 public class RedBlackTreeTest {
 
-    @Test
-    public void testRedBlackTreeInsert() {
-        RedBlackTree<Integer> rbt = new RedBlackTree<Integer>();
-        for(int i = 1; i<10;i++) {
-            rbt.add(i);
-        }
-        System.out.println("Finished");
+  @Test
+  public void testRedBlackTreeInsert() {
+    RedBlackTree<Integer> rbt = new RedBlackTree<Integer>();
+    for (int i = 1; i < 10; i++) {
+      rbt.add(i);
     }
+    System.out.println("Finished");
+  }
+  
+  @Test
+  public void breadthFirstSearchTest() {
+    RedBlackTree<Integer> rbt = new RedBlackTree<Integer>();
+    for(int i = 1; i < 10; i ++) {
+      rbt.add(i);
+    }
+    /* do bfs */
+    
+  }
 
 }

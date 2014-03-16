@@ -4,4 +4,7 @@ gradle/
 gradlew
 gradlew.bat
 redblacktree.iml
-
+bin/
+.classpath/
+.project/
+.settings/
