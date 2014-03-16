@@ -10,6 +10,7 @@ package com.beardfish.tree;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -206,12 +207,6 @@ public class RedBlackTree<E> implements Set<E> {
   }
 
   @Override
-  public Iterator<E> iterator() {
-
-    return null;
-  }
-
-  @Override
   public boolean remove(Object o) {
 
     return false;
@@ -242,6 +237,11 @@ public class RedBlackTree<E> implements Set<E> {
   @Override
   public <T> T[] toArray(T[] arr) {
     return null;
+  }
+
+  @Override
+  public Iterator<E> iterator() {
+    return new Itr();
   }
 
   /* utility methods */
@@ -276,8 +276,6 @@ public class RedBlackTree<E> implements Set<E> {
     }
     rightChild.setLeft(node);
     node.setRight(rightChildLeft);
-
-
   }
 
   private void rotateRight(Node<E> node) {
@@ -293,6 +291,40 @@ public class RedBlackTree<E> implements Set<E> {
     leftChild.setRight(node);
     node.setLeft(leftChildRight);
   }
+  
+  
+  /**
+   * private Iterator class that traverses the tree in order
+   * @author christian
+   *
+   */
+  private final class Itr implements Iterator<E>{
+    
+    /* Used to verify if the tree has been modified during iteration */
+    private int expectedModCount = modCount;
+
+    @Override
+    public boolean hasNext() {
+      // TODO Auto-generated method stub
+      return false;
+    }
+
+    @Override
+    public E next() {
+      // TODO Auto-generated method stub
+      if(this.expectedModCount!=modCount) {
+        throw new ConcurrentModificationException();
+      }
+      return null;
+    }
+
+    @Override
+    public void remove() {
+      // TODO Auto-generated method stub
+      
+    }
+    
+  }
 
   /* node inner class */
 
@@ -300,9 +332,7 @@ public class RedBlackTree<E> implements Set<E> {
 
     public static enum Color {
       Black, Red
-    }
-
-    ;
+    };
 
     private final E value;
     private Node<E> parent;
