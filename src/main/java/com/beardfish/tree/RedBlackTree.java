@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Stack;
 
 public class RedBlackTree<E> implements Set<E> {
 
@@ -33,9 +34,9 @@ public class RedBlackTree<E> implements Set<E> {
   public boolean add(E ele) {
     boolean inserted = false;
     if (this.root == null) {
+      this.modCount++;
       this.root = new Node<E>(ele, null, null, null, Node.Color.Black);
       inserted = true;
-      this.modCount++;
     } else {
       Node<E> newNode = null;
       if (this.comparator != null) {
@@ -45,6 +46,7 @@ public class RedBlackTree<E> implements Set<E> {
       }
       /* rebalance the tree */
       if (newNode != null) {
+        this.modCount++;
         inserted = true;
         rebalanceTree(newNode);
       }
@@ -61,7 +63,7 @@ public class RedBlackTree<E> implements Set<E> {
   public boolean addAll(Collection<? extends E> col) {
     boolean inserted = true;
     Iterator<? extends E> it = col.iterator();
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       inserted = inserted && this.add(it.next());
     }
     return inserted;
@@ -256,7 +258,11 @@ public class RedBlackTree<E> implements Set<E> {
     Node<E> rightChild = node.getRight();
     Node<E> rightChildLeft = rightChild.getLeft();
     if (grandParent != null) {
-      grandParent.setLeft(rightChild);
+      if (grandParent.getLeft() == node)
+        grandParent.setLeft(rightChild);
+      else {
+        grandParent.setRight(rightChild);
+      }
     } else {
       this.root = rightChild;
       this.root.setParent(null);
@@ -270,7 +276,11 @@ public class RedBlackTree<E> implements Set<E> {
     Node<E> leftChild = node.getLeft();
     Node<E> leftChildRight = leftChild.getRight();
     if (grandParent != null) {
-      grandParent.setRight(leftChild);
+      if (grandParent.getLeft() == node) {
+        grandParent.setLeft(leftChild);
+      } else {
+        grandParent.setRight(leftChild);
+      }
     } else {
       this.root = leftChild;
       this.root.setParent(null);
@@ -278,39 +288,88 @@ public class RedBlackTree<E> implements Set<E> {
     leftChild.setRight(node);
     node.setLeft(leftChildRight);
   }
+
+
+  public void depthFirstSearch() {
+    depthFirstSearch(this.root);
+  }
+
+  public void breadthFirstSearch() {
+    breadthFirstSearch(this.root);
+  }
+
+  private void depthFirstSearch(Node<E> node) {
+    if (node != null) {
+      depthFirstSearch(node.getLeft());
+      System.out.println(node);
+      depthFirstSearch(node.getRight());
+    }
+  }
   
-  
+  private void breadthFirstSearch(Node<E> node) {
+    if(node!=null) {
+      // TODO : finish
+    }
+  }
+
+
   /**
    * private Iterator class that traverses the tree in order
+   * 
    * @author christian
-   *
+   * 
    */
-  private final class Itr implements Iterator<E>{
-    
+  private final class Itr implements Iterator<E> {
+
     /* Used to verify if the tree has been modified during iteration */
     private int expectedModCount = modCount;
 
+    /* the queue to keep track of nodes as they are explored in order */
+    private final Stack<Node<E>> nodeStack;
+
+    private Itr() {
+      this.nodeStack = new Stack<Node<E>>();
+      if (root != null)
+        this.loadNodes(root);
+    }
+
+    /**
+     * Loads the nodes in order they would be explored using DFS
+     * 
+     * @param node
+     */
+    private final void loadNodes(Node<E> node) {
+      if (node != null) {
+        Node<E> leftChild = node.getLeft();
+        Node<E> rightChild = node.getRight();
+        this.nodeStack.push(node);
+        loadNodes(leftChild);
+        loadNodes(rightChild);
+      }
+
+    }
+
     @Override
     public boolean hasNext() {
-      // TODO Auto-generated method stub
-      return false;
+      return !nodeStack.isEmpty();
     }
 
     @Override
     public E next() {
       // TODO Auto-generated method stub
-      if(this.expectedModCount!=modCount) {
+      if (this.expectedModCount != modCount) {
         throw new ConcurrentModificationException();
       }
-      return null;
+
+      return this.nodeStack.pop().getValue();
     }
 
     @Override
     public void remove() {
       // TODO Auto-generated method stub
-      
+      throw new UnsupportedOperationException("Not current implemented.");
     }
-    
+
   }
 
   /* node inner class */
@@ -355,16 +414,30 @@ public class RedBlackTree<E> implements Set<E> {
       return left;
     }
 
+    /**
+     * Add a new left child Need to modify the parent of the new left child to be correct
+     * 
+     * @param left
+     */
     public void setLeft(Node<E> left) {
       this.left = left;
+      if (left != null)
+        this.left.setParent(this);
     }
 
     public Node<E> getRight() {
       return right;
     }
 
+    /**
+     * Add a new right child Need to modify the parent of the new right child to correct
+     * 
+     * @param right
+     */
     public void setRight(Node<E> right) {
       this.right = right;
+      if (right != null)
+        this.right.setParent(this);
     }
 
     public Color getColor() {
@@ -374,23 +447,23 @@ public class RedBlackTree<E> implements Set<E> {
     public void setColor(Color color) {
       this.color = color;
     }
-    
+
     public Node<E> getGrandParent() {
       Node<E> parent = this.getParent();
-      if(parent==null) {
+      if (parent == null) {
         return null;
       }
       return parent.getParent();
     }
-    
+
     public Node<E> getUncle() {
       Node<E> grandParent = this.getGrandParent();
-      
-      if(grandParent==null) {
+
+      if (grandParent == null) {
         return null;
       }
-      
-      if(this.getParent()==grandParent.getLeft()) {
+
+      if (this.getParent() == grandParent.getLeft()) {
         return grandParent.getRight();
       } else {
         return grandParent.getLeft();
