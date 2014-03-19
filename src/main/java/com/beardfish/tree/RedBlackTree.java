@@ -59,7 +59,12 @@ public class RedBlackTree<E> implements Set<E> {
 
   @Override
   public boolean addAll(Collection<? extends E> col) {
-    return false;
+    boolean inserted = true;
+    Iterator<? extends E> it = col.iterator();
+    while(it.hasNext()) {
+      inserted = inserted && this.add(it.next());
+    }
+    return inserted;
   }
 
   /**
@@ -67,7 +72,7 @@ public class RedBlackTree<E> implements Set<E> {
    * 
    * @param node -- the starting node
    * @param element -- the element to be added
-   * @return Node<E> if the element was successfully added or null if not
+   * @return Node<E> if the element was successfully added or null if the element already exists
    */
   public Node<E> binarySearchWithComparator(Node<E> node, E element) {
     int compare = this.comparator.compare(element, node.getValue());
@@ -98,7 +103,7 @@ public class RedBlackTree<E> implements Set<E> {
    * 
    * @param node -- the starting node
    * @param element -- the element to be added
-   * @return Node<E> if the element was successfully added or null if not
+   * @return Node<E> if the element was successfully added or null if the element already exists
    */
   public Node<E> binarySearchWithComparable(Node<E> node, E element) {
     Comparable<? super E> key = (Comparable<? super E>) element;
@@ -141,15 +146,15 @@ public class RedBlackTree<E> implements Set<E> {
       return;
     } else if (node.getParent().getColor().equals(Node.Color.Red)) {
       /* check the uncle to see if he is red as well */
-      Node<E> uncle = (Node<E>) getUncle(node);
+      Node<E> uncle = node.getUncle();
       if (uncle != null && uncle.getColor().equals(Node.Color.Red)) {
-        Node<E> grandParent = (Node<E>) getGrandParent(node);
+        Node<E> grandParent = node.getGrandParent();
         node.getParent().setColor(Node.Color.Black);
         uncle.setColor(Node.Color.Black);
         grandParent.setColor(Node.Color.Red);
         rebalanceTree(grandParent);
       } else if (uncle == null || uncle.getColor().equals(Node.Color.Black)) {
-        Node<E> grandParent = (Node<E>) getGrandParent(node);
+        Node<E> grandParent = node.getGrandParent();
         if (node.getParent().getRight() == node && grandParent.getLeft() == node.getParent()) {
           rotateLeft(node.getParent());
           node = node.getLeft();
@@ -161,7 +166,7 @@ public class RedBlackTree<E> implements Set<E> {
         /*
          * need to grab the grand parent again in case of right and left rotation
          */
-        grandParent = (Node<E>) getGrandParent(node);
+        grandParent = node.getGrandParent();
         node.getParent().setColor(Node.Color.Black);
         grandParent.setColor(Node.Color.Red);
         if (node == node.getParent().getLeft()) {
@@ -245,24 +250,6 @@ public class RedBlackTree<E> implements Set<E> {
   }
 
   /* utility methods */
-
-  private static Node<?> getGrandParent(Node<?> node) {
-    if (node != null && node.getParent() != null) {
-      return node.getParent().getParent();
-    }
-    return null;
-  }
-
-  private static Node<?> getUncle(Node<?> node) {
-    Node<?> grandParent = getGrandParent(node);
-    if (grandParent == null) {
-      return null;
-    }
-    if (node.getParent() == grandParent.getLeft()) {
-      return grandParent.getRight();
-    }
-    return grandParent.getLeft();
-  }
 
   private void rotateLeft(Node<E> node) {
     Node<E> grandParent = node.getParent();
@@ -386,6 +373,28 @@ public class RedBlackTree<E> implements Set<E> {
 
     public void setColor(Color color) {
       this.color = color;
+    }
+    
+    public Node<E> getGrandParent() {
+      Node<E> parent = this.getParent();
+      if(parent==null) {
+        return null;
+      }
+      return parent.getParent();
+    }
+    
+    public Node<E> getUncle() {
+      Node<E> grandParent = this.getGrandParent();
+      
+      if(grandParent==null) {
+        return null;
+      }
+      
+      if(this.getParent()==grandParent.getLeft()) {
+        return grandParent.getRight();
+      } else {
+        return grandParent.getLeft();
+      }
     }
 
     @Override
