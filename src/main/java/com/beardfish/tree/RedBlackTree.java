@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 
@@ -294,21 +296,11 @@ public class RedBlackTree<E> implements Set<E> {
     depthFirstSearch(this.root);
   }
 
-  public void breadthFirstSearch() {
-    breadthFirstSearch(this.root);
-  }
-
   private void depthFirstSearch(Node<E> node) {
     if (node != null) {
       depthFirstSearch(node.getLeft());
       System.out.println(node);
       depthFirstSearch(node.getRight());
-    }
-  }
-  
-  private void breadthFirstSearch(Node<E> node) {
-    if(node!=null) {
-      // TODO : finish
     }
   }
 
@@ -325,10 +317,10 @@ public class RedBlackTree<E> implements Set<E> {
     private int expectedModCount = modCount;
 
     /* the queue to keep track of nodes as they are explored in order */
-    private final Stack<Node<E>> nodeStack;
+    private final Queue<Node<E>> nodes;
 
     private Itr() {
-      this.nodeStack = new Stack<Node<E>>();
+      this.nodes = new LinkedList<Node<E>>();
       if (root != null)
         this.loadNodes(root);
     }
@@ -340,18 +332,16 @@ public class RedBlackTree<E> implements Set<E> {
      */
     private final void loadNodes(Node<E> node) {
       if (node != null) {
-        Node<E> leftChild = node.getLeft();
-        Node<E> rightChild = node.getRight();
-        this.nodeStack.push(node);
-        loadNodes(leftChild);
-        loadNodes(rightChild);
+        loadNodes(node.getLeft());
+        this.nodes.add(node);
+        loadNodes(node.getRight());
       }
 
     }
 
     @Override
     public boolean hasNext() {
-      return !nodeStack.isEmpty();
+      return !nodes.isEmpty();
     }
 
     @Override
@@ -361,7 +351,7 @@ public class RedBlackTree<E> implements Set<E> {
         throw new ConcurrentModificationException();
       }
 
-      return this.nodeStack.pop().getValue();
+      return this.nodes.poll().getValue();
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.beardfish.tree.test;
 
+import java.util.Iterator;
+
 import com.beardfish.tree.RedBlackTree;
 
 import org.junit.Test;
@@ -12,10 +14,14 @@ public class RedBlackTreeTest {
   @Test
   public void testRedBlackTreeInsert() {
     RedBlackTree<Integer> rbt = new RedBlackTree<Integer>();
-    for (int i = 1; i< 9; i++) {
+    for (int i = 1; i < 9; i++) {
       rbt.add(i);
     }
-    System.out.println("Finished");
+    Iterator<Integer> it = rbt.iterator();
+    while(it.hasNext()) {
+      System.out.println(it.next());
+    }
+    
   }
   
   /* TODO tree insertion breaks down at a certain number 'n'. Currently 1-4 works */
