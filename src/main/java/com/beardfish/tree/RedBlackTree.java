@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
-import java.util.Stack;
 
 public class RedBlackTree<E> implements Set<E> {
 
@@ -40,12 +39,7 @@ public class RedBlackTree<E> implements Set<E> {
       this.root = new Node<E>(ele, null, null, null, Node.Color.Black);
       inserted = true;
     } else {
-      Node<E> newNode = null;
-      if (this.comparator != null) {
-        newNode = this.binarySearchWithComparator(this.root, ele);
-      } else {
-        newNode = this.binarySearchWithComparable(this.root, ele);
-      }
+      Node<E> newNode = this.binarySearchInsert(this.root, ele);
       /* rebalance the tree */
       if (newNode != null) {
         this.modCount++;
@@ -71,6 +65,8 @@ public class RedBlackTree<E> implements Set<E> {
     return inserted;
   }
 
+  /* node insert methods */
+
   /**
    * Adds a node into the tree using the comparator
    * 
@@ -78,12 +74,20 @@ public class RedBlackTree<E> implements Set<E> {
    * @param element -- the element to be added
    * @return Node<E> if the element was successfully added or null if the element already exists
    */
-  public Node<E> binarySearchWithComparator(Node<E> node, E element) {
-    int compare = this.comparator.compare(element, node.getValue());
+  private Node<E> binarySearchInsert(Node<E> node, E element) {
+    /* choose the proper compare to */
+    int compare = 0;
+    if (this.comparator != null) {
+      compare = this.comparator.compare(element, node.getValue());
+    } else {
+      Comparable<? super E> key = (Comparable<? super E>) element;
+      compare = key.compareTo(node.getValue());
+    }
+    /* check where the element goes */
     if (compare < 0) {
       /* element is less than node value */
       if (node.getLeft() != null) {
-        return binarySearchWithComparator(node.getLeft(), element);
+        return binarySearchInsert(node.getLeft(), element);
       } else {
         Node<E> newNode = new Node<E>(element, node, null, null);
         node.setLeft(newNode);
@@ -92,7 +96,7 @@ public class RedBlackTree<E> implements Set<E> {
     } else if (compare > 0) {
       /* element is greater than node value */
       if (node.getRight() != null) {
-        return binarySearchWithComparator(node.getRight(), element);
+        return binarySearchInsert(node.getRight(), element);
       } else {
         Node<E> newNode = new Node<E>(element, node, null, null);
         node.setRight(newNode);
@@ -102,36 +106,37 @@ public class RedBlackTree<E> implements Set<E> {
     return null;
   }
 
+  /* node lookup methods */
+
   /**
-   * Adds a node into the tree using the comparable
+   * Binary search method that looks for a particular node in the tree using comparator
    * 
-   * @param node -- the starting node
-   * @param element -- the element to be added
-   * @return Node<E> if the element was successfully added or null if the element already exists
+   * @param node
+   * @param element
+   * @return true if the node exists; false otherwise
    */
-  public Node<E> binarySearchWithComparable(Node<E> node, E element) {
-    Comparable<? super E> key = (Comparable<? super E>) element;
-    int compare = key.compareTo(node.getValue());
-    if (compare < 0) {
-      /* element is less than node value */
-      if (node.getLeft() != null) {
-        return binarySearchWithComparable(node.getLeft(), element);
-      } else {
-        Node<E> newNode = new Node<E>(element, node, null, null);
-        node.setLeft(newNode);
-        return newNode;
-      }
-    } else if (compare > 0) {
-      /* element is greater than node value */
-      if (node.getRight() != null) {
-        return binarySearchWithComparable(node.getRight(), element);
-      } else {
-        Node<E> newNode = new Node<E>(element, node, null, null);
-        node.setRight(newNode);
-        return newNode;
-      }
+  private boolean binarySearch(Node<E> node, E element) {
+    /* make the proper comparison */
+    int compare = 0;
+    if (this.comparator != null) {
+      compare = this.comparator.compare(element, node.getValue());
+    } else {
+      Comparable<? super E> key = (Comparable<? super E>) element;
+      compare = key.compareTo(node.getValue());
     }
-    return null;
+    /* check where the node goes */
+    if (compare < 0) {
+      if (node.getLeft() != null) {
+        return binarySearch(node.getLeft(), element);
+      }
+      return false;
+    } else if (compare > 0) {
+      if (node.getRight() != null) {
+        return binarySearch(node.getRight(), element);
+      }
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -189,15 +194,22 @@ public class RedBlackTree<E> implements Set<E> {
 
   @Override
   public boolean contains(Object o) {
-    if (o == null || !o.getClass().equals(this.root.value.getClass())) {
+    /* can't contain null values */
+    if (o == null) {
+      return false;
+    }
+    /* if root is null then no searching necessary */
+    if(this.root==null) {
       return false;
     }
     /* do some binary searching */
-    E oe = (E) o;
-    if (this.comparator == null) {
-      return this.binarySearchWithComparable(this.root, oe) != null;
+    E oe = null;
+    try {
+      oe = (E) o;
+    } catch (ClassCastException ce) {
+      return false;
     }
-    return this.binarySearchWithComparator(this.root, oe) != null;
+    return this.binarySearch(this.root, oe);
   }
 
   @Override
