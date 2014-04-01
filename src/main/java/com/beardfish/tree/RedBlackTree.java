@@ -188,7 +188,9 @@ public class RedBlackTree<E> implements Set<E> {
 
     @Override
     public void clear() {
+        this.modCount++;
         this.root = null;
+        this.size = 0;
     }
 
     @Override
@@ -241,10 +243,12 @@ public class RedBlackTree<E> implements Set<E> {
         /* find the node */
         Node<E> foundNode = this.binarySearch(this.root,oe);
         if(foundNode!=null) {
+            this.modCount++;
             /* only one node case */
             if(foundNode==this.root) {
                 this.root=null;
             }
+            return true;
         }
 
         return false;
@@ -262,8 +266,15 @@ public class RedBlackTree<E> implements Set<E> {
 
     @Override
     public boolean retainAll(Collection<?> col) {
-
-        return false;
+        Iterator<E> it = this.iterator();
+        boolean changed = false;
+        while(it.hasNext()) {
+            Object o = it.next();
+            if(!col.contains(o)){
+                changed = changed || this.remove(o);
+            }
+        }
+        return changed;
     }
 
     @Override
@@ -395,10 +406,10 @@ public class RedBlackTree<E> implements Set<E> {
         private int expectedModCount = modCount;
 
         /* the queue to keep track of nodes as they are explored in order */
-        private final Queue<Node<E>> nodes;
+        private final Queue<E> nodes;
 
         private Itr() {
-            this.nodes = new LinkedList<Node<E>>();
+            this.nodes = new LinkedList<E>();
             if (root != null)
                 this.loadNodes(root);
         }
@@ -411,7 +422,7 @@ public class RedBlackTree<E> implements Set<E> {
         private final void loadNodes(Node<E> node) {
             if (node != null) {
                 loadNodes(node.getLeft());
-                this.nodes.add(node);
+                this.nodes.add(node.getValue());
                 loadNodes(node.getRight());
             }
 
@@ -424,18 +435,20 @@ public class RedBlackTree<E> implements Set<E> {
 
         @Override
         public E next() {
-            // TODO Auto-generated method stub
             if (this.expectedModCount != modCount) {
                 throw new ConcurrentModificationException();
             }
 
-            return this.nodes.poll().getValue();
+            return this.nodes.poll();
         }
 
         @Override
         public void remove() {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Not current implemented.");
+            if(this.expectedModCount != modCount) {
+                RedBlackTree.this.remove(this.nodes.poll());
+            }
+            /* expected mount count in tree will change so it needs to be changed here */
+            this.expectedModCount = modCount;
         }
 
     }
