@@ -40,7 +40,7 @@ public class RedBlackTree<E> implements Set<E> {
             inserted = true;
         } else {
             Node<E> newNode = this.binarySearchInsert(this.root, ele);
-      /* rebalance the tree */
+            /* rebalance the tree */
             if (newNode != null) {
                 this.modCount++;
                 inserted = true;
@@ -248,6 +248,7 @@ public class RedBlackTree<E> implements Set<E> {
             if(foundNode==this.root) {
                 this.root=null;
             }
+
             return true;
         }
 
@@ -397,7 +398,7 @@ public class RedBlackTree<E> implements Set<E> {
 
     /**
      * private Iterator class that traverses the tree in order
-     *
+     * TODO: need to fix Queue approach because it doesn't reflect the order of the tree
      * @author christian
      */
     private final class Itr implements Iterator<E> {
