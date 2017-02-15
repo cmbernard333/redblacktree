@@ -260,6 +260,7 @@ public class RedBlackTree<E> implements Set<E> {
         boolean removed = true;
         Iterator<?> it = col.iterator();
         while(it.hasNext()) {
+            /* TODO - actually call remove */
             removed = removed && this.contains(it.next());
         }
         return removed;
